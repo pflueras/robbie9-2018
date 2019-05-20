@@ -1,0 +1,75 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Robbie9</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function() {
+            // Use a "/test" namespace.
+            // An application can open a connection on multiple namespaces, and
+            // Socket.IO will multiplex all those connections on a single
+            // physical channel. If you don't care about multiple channels, you
+            // can set the namespace to an empty string.
+            namespace = '/test';
+
+            // Connect to the Socket.IO server.
+            // The connection URL has the following format:
+            //     http[s]://<domain>:<port>[/<namespace>]
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + namespace);
+
+            // Event handler for server sent data.
+            // The callback function is invoked whenever the server emits data
+            // to the client. The data is then displayed in the "Received"
+            // section of the page.
+            socket.on('car_status', function(msg) {
+              console.log('car status: ' + msg['status']);
+              /*
+                $('#log').append('<br>' + $('<div/>').text('Distances->'
+                    + ' front:' + msg['front']
+                    + ' side: ' + msg['side']
+                    + ' back: ' + msg['back']).html());
+                    */
+            });
+
+            // Handlers for the different forms in the page.
+            // These accept data from the user and send it to the server in a
+            // variety of ways
+            $('form#car-forward').submit(function(event) {
+                console.log("car goes forward");
+                socket.emit('car_forward', {message: 'Move the car forward!'});
+                return false;
+            });
+
+            $('form#car-backward').submit(function(event) {
+                console.log("car goes backward");
+                socket.emit('car_backward', {message: 'Move the car backward!'});
+                return false;
+            });
+
+            $('form#car-stop').submit(function(event) {
+                console.log("car stops");
+                socket.emit('car_stop', {message: 'Stop the car!'});
+                return false;
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Robbie9-SocketIO Test</h1>
+    <h2>Send:</h2>
+
+    <form id="car-forward" method="POST" action='#'>
+        <input type="submit" value="Forward">
+    </form>
+
+    <form id="car-backward" method="POST" action='#'>
+        <input type="submit" value="Backward">
+    </form>
+
+    <form id="car-stop" method="POST" action='#'>
+        <input type="submit" value="Stop">
+    </form>
+
+</body>
+</html>
