@@ -2,14 +2,15 @@ from flask import Flask
 from flask_socketio import SocketIO, emit
 from flask import Flask, Response, render_template
 from time import sleep
-
+import datetime
 import json
+from cloud.s3_service import S3Service
 
 class Controller:
     def __init__(self, car):
         self._car = car
         self._flaskApp = Flask('robbie9')
-
+        self._s3_service = S3Service('aclabs2019-blue')
 
     def index(self):
         return render_template('index.html')
@@ -38,7 +39,16 @@ class Controller:
         print('Stopping the car. Got message: ' + str(message))
         self._car.stop()
         emit('car_status', {'status': self._car.status()})
-        
+
+
+    def take_picture(self, message):
+        today = datetime.date.today()
+        now = datetime.datetime.now()
+        image_filename = str(today) + '_' + str(now.time()) + '.png'
+        print('Taking picture: ' + image_filename)
+        self._car.take_picture('static/' + image_filename)
+        self._s3_service.upload('static/' + image_filename, image_filename)
+
 
     def run(self):
         self._flaskApp.config['SECRET_KEY'] = 'secret!'
@@ -49,4 +59,5 @@ class Controller:
         socket_io.on('car_forward', namespace = '/test')(self.move_car_forward)
         socket_io.on('car_backward', namespace = '/test')(self.move_car_backward)
         socket_io.on('car_stop', namespace = '/test')(self.stop_car)
+        socket_io.on('take_picture', namespace = '/test')(self.take_picture)
         socket_io.run(self._flaskApp, host = '0.0.0.0')

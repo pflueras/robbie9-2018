@@ -52,6 +52,12 @@
                 socket.emit('car_stop', {message: 'Stop the car!'});
                 return false;
             });
+
+            $('form#take-picture').submit(function(event) {
+                console.log("Taking a picture...");
+                socket.emit('take_picture', {message: 'Please take a picture!'});
+                return false;
+            });
         });
     </script>
 </head>
@@ -69,6 +75,10 @@
 
     <form id="car-stop" method="POST" action='#'>
         <input type="submit" value="Stop">
+    </form>
+
+    <form id="take-picture" method="POST" action='#'>
+        <input type="submit" value="Take picture">
     </form>
 
 </body>
